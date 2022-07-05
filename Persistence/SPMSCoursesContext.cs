@@ -6,7 +6,7 @@ namespace Persistence
     public class SPMSCoursesContext : DbContext
     {
         public DbSet<AcademicStaff> AcademicStaff { get; set; }
-        
+        public DbSet<Student> Students { get; set; }
         public DbSet<Course> Courses { get; set; }
         
         public DbSet<Courses_AcademicStaff> CoursesAcademicStaff { get; set; }
@@ -33,6 +33,11 @@ namespace Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Student>(entity =>
+            {
+                entity.HasKey(e => e.UserId);
+            });
 
             modelBuilder.Entity<AcademicStaff>(entity =>
             {
@@ -96,6 +101,10 @@ namespace Persistence
                     .WithMany(e => e.Grades)
                     .HasForeignKey(e => e.ExamSeasonId)
                     .HasConstraintName("FK_Grades_ExamSeasons");
+                entity.HasOne(e => e.Student)
+                    .WithMany(e => e.Grades)
+                    .HasForeignKey(e => e.StudentId)
+                    .HasConstraintName("FK_Grades_Students");
                 entity.HasOne(e => e.CoursesAcademicStaff)
                     .WithMany(c => c.Grades)
                     .HasForeignKey(e => new {e.CourseId, e.AcademicStaffId})

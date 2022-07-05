@@ -39,7 +39,7 @@ namespace Application.Queries.Grades
                     .Where(g =>
                     g.StatusId == (int) GradeStatusTypes.Accepted &&
                     g.ExamSeason.Faculty == request.GenerateTranscriptRequest.FacultyId &&
-                    g.Student == request.GenerateTranscriptRequest.StudentId)
+                    g.StudentId == request.GenerateTranscriptRequest.StudentId)
                     .Select(g => new Grade
                     {
                         Value = g.Value,

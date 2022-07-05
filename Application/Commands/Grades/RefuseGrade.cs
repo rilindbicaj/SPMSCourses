@@ -38,10 +38,10 @@ namespace Application.Commands.Grades
                 if (grade.Value == -1 || grade.DateGraded == null)
                     return ResultFactory.CreateFailedResult<Unit>("Cannot refuse a grade that hasn't been graded yet.");
                 
-                if(grade.Student != request.RefuseGradeRequest.UserId)
+                if(grade.StudentId != request.RefuseGradeRequest.UserId)
                     return ResultFactory.CreateFailedResult<Unit>("The specified student has not registered the exam the specified grade represents.");
                 
-                if(DateTime.Now.Subtract(grade.DateGraded).TotalSeconds > 172800) // Two days, in seconds; checks if it's been more than 2 days since the date of grading
+                if(grade.DateGraded != null && DateTime.Now.Subtract(grade.DateGraded.Value).TotalSeconds > 172800) // Two days, in seconds; checks if it's been more than 2 days since the date of grading
                     return ResultFactory.CreateFailedResult<Unit>("Grade cannot be refused 48 hours after it's been graded.");
 
                 grade.StatusId = (int)GradeStatusTypes.Refused;

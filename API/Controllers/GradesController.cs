@@ -5,7 +5,6 @@ using Application.Commands.Grades;
 using Application.Queries.Grades;
 using Application.Requests;
 using Application.Responses;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -56,6 +55,34 @@ namespace API.Controllers
         {
             var response = await Mediator.Send(new GenerateTranscript.Query
                 { GenerateTranscriptRequest = new GenerateTranscriptRequest { FacultyId = facultyId, StudentId = studentId} });
+            return HandleResult(response);
+        }
+
+        [HttpPost("registerExam")]
+        public async Task<ActionResult> RegisterExam(RegisterExamRequest registerExamRequest)
+        {
+            var response = await Mediator.Send(new RegisterExam.Command { RegisterExamRequest = registerExamRequest });
+            return HandleResult(response);
+        }
+
+        [HttpPost("examHistory/{facultyId}/{studentId}")]
+
+        public async Task<ActionResult<List<ExamHistoryResponse>>> GetExamHistory(int facultyId, Guid studentId)
+        {
+            var response = await Mediator.Send(new GenerateExamHistory.Query
+                { FacultyId = facultyId, StudentId = studentId });
+            return HandleResult(response);
+        }
+
+        [HttpGet("examsRegisteredForProfessor/{facultyId}/{courseId}/{lecturerId}")]
+
+        public async Task<ActionResult<List<GradeResponse>>> GetExamsRegisteredForProfessor(int facultyId, int courseId,
+            Guid lecturerId)
+        {
+            var response = await Mediator.Send(new GetExamsRegisteredForProfessor.Query
+            {
+                FacultyId = facultyId, CourseId = courseId, LecturerId = lecturerId
+            });
             return HandleResult(response);
         }
 

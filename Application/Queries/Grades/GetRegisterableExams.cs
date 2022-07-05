@@ -48,7 +48,8 @@ namespace Application.Queries.Grades
                 var specialization = await _context.Specializations.Where(e =>
                     e.SpecializationId == request.GetRegistrableExamsRequest.SpecializationId).FirstOrDefaultAsync();
                 
-                if(specialization == null) return ResultFactory.CreateFailedResult<List<CourseResponse>>("Specified specialization does not exist");
+                if(specialization == null) 
+                    return ResultFactory.CreateFailedResult<List<CourseResponse>>("Specified specialization does not exist");
 
                 var currentlyOpenedSeason = await GetCurrenlyOpenedExamSeason(specialization.FacultyId);
                 
@@ -77,7 +78,7 @@ namespace Application.Queries.Grades
                          || c.SpecializationId == specialization.ParentSpecializationId)
                         && c.SemesterId <= currentSemesterId
                         && !_context.Grades.Any(g =>
-                                (g.Student == studentId && g.CourseId == c.CourseId && g.StatusId < 3) // Do not take exams that the student has taken and accepted / pending
+                                (g.StudentId == studentId && g.CourseId == c.CourseId && g.StatusId < 3) // Do not take exams that the student has taken and accepted / pending
                         ))
                     .Select(c => new Course
                     {

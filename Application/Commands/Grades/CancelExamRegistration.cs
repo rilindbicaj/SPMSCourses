@@ -39,7 +39,7 @@ namespace Application.Commands.Grades
                 if(examSeason.StatusId != (int) ExamSeasonStatusTypes.Open)
                     return ResultFactory.CreateFailedResult<Unit>("Exam registration cannot be cancelled because the exam season it was registered in is no longer open.");
                 
-                if(grade.Student != request.CancelExamRegistrationRequest.StudentId)
+                if(grade.StudentId != request.CancelExamRegistrationRequest.StudentId)
                     return ResultFactory.CreateFailedResult<Unit>("Unauthorized access - the specified student has not registered the specified exam.");
 
                 _context.Grades.Remove(grade);

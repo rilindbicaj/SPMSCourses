@@ -16,7 +16,7 @@ using Persistence;
 
 namespace Application.Queries.Grades
 {
-    /**
+    /*
      * Supplied with the ID of the desired faculty and student, returns all the exams the student has registered in the current exam season
      * Exam season can be opened or in process. 
      */
@@ -49,7 +49,7 @@ namespace Application.Queries.Grades
 
                 var registeredExams =
                     await GetCurrentlyRegisteredGrades(request.GetCurrentRegisteredExamsRequest.StudentId,
-                        currentlyOpenedSeason.Faculty);
+                        currentlyOpenedSeason.ExamSeasonId);
                 
                 var response = _mapper.Map<List<GradeResponse>>(registeredExams);
                 
@@ -62,7 +62,7 @@ namespace Application.Queries.Grades
             private async Task<List<Grade>> GetCurrentlyRegisteredGrades(Guid studentId, int examSeasonId)
             {
                 return await _context.Grades.Where(g =>
-                        g.Student == studentId
+                        g.StudentId == studentId
                         && g.ExamSeasonId == examSeasonId)
                     .Select(g => 
                         new Grade {
@@ -80,7 +80,7 @@ namespace Application.Queries.Grades
                 
             }
             
-            /**
+            /*
              * Gets the currently opened exam season for the specified faculty.
              * An exam season is considered open, for this use case,
              * if it's either in process (exams are taking place or open for registrations.

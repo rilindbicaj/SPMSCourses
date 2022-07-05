@@ -30,6 +30,8 @@ namespace Application.Core
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(e => e.Status))
                 .ForMember(dest => dest.Professor, opt => opt.MapFrom(e => e.CoursesAcademicStaff.AcademicStaff));
 
+
+            CreateMap<ExamSeason, ExamHistoryResponse>();
             CreateMap<AcademicStaff, AcademicStaffResponse>();
             CreateMap<GradeStatus, GradeStatusResponse>();
             CreateMap<Semester, SemesterResponse>();
