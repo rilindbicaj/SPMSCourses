@@ -11,14 +11,14 @@ namespace API.Controllers
 {
     public class GradesController : MediatorController
     {
-        
+
         [HttpPost("getCurrentlyRegisteredExams")]
 
         public async Task<ActionResult<List<GradeResponse>>> GetCurrentlyRegisteredExams(
             GetCurrentRegisteredExamsRequest getCurrentRegisteredExamsRequest)
         {
             var response = await Mediator.Send(new GetCurrentRegisteredExams.Query
-                { GetCurrentRegisteredExamsRequest = getCurrentRegisteredExamsRequest });
+            { GetCurrentRegisteredExamsRequest = getCurrentRegisteredExamsRequest });
             return HandleResult(response);
         }
 
@@ -38,13 +38,19 @@ namespace API.Controllers
             return HandleResult(response);
         }
 
-        [HttpDelete("cancelExamRegistration")]
+        [HttpDelete("cancelExamRegistration/{gradeId}/{studentId}")]
 
         public async Task<ActionResult> CancelExamRegistration(
-            CancelExamRegistrationRequest cancelExamRegistrationRequest)
+            int gradeId, Guid studentId)
         {
             var response = await Mediator.Send(new CancelExamRegistration.Command
-                { CancelExamRegistrationRequest = cancelExamRegistrationRequest });
+            {
+                CancelExamRegistrationRequest = new CancelExamRegistrationRequest
+                {
+                    GradeId = gradeId,
+                    StudentId = studentId
+                }
+            });
             return HandleResult(response);
         }
 
@@ -54,7 +60,7 @@ namespace API.Controllers
             int facultyId, Guid studentId)
         {
             var response = await Mediator.Send(new GenerateTranscript.Query
-                { GenerateTranscriptRequest = new GenerateTranscriptRequest { FacultyId = facultyId, StudentId = studentId} });
+            { GenerateTranscriptRequest = new GenerateTranscriptRequest { FacultyId = facultyId, StudentId = studentId } });
             return HandleResult(response);
         }
 
@@ -65,24 +71,32 @@ namespace API.Controllers
             return HandleResult(response);
         }
 
-        [HttpPost("examHistory/{facultyId}/{studentId}")]
+        [HttpGet("examHistory/{facultyId}/{studentId}")]
 
         public async Task<ActionResult<List<ExamHistoryResponse>>> GetExamHistory(int facultyId, Guid studentId)
         {
             var response = await Mediator.Send(new GenerateExamHistory.Query
-                { FacultyId = facultyId, StudentId = studentId });
+            { FacultyId = facultyId, StudentId = studentId });
             return HandleResult(response);
         }
 
-        [HttpGet("examsRegisteredForProfessor/{facultyId}/{courseId}/{lecturerId}")]
+        [HttpGet("examsRegisteredForProfessor/{facultyId}/{lecturerId}")]
 
-        public async Task<ActionResult<List<GradeResponse>>> GetExamsRegisteredForProfessor(int facultyId, int courseId,
+        public async Task<ActionResult<List<GradeResponse>>> GetExamsRegisteredForProfessor(int facultyId,
             Guid lecturerId)
         {
             var response = await Mediator.Send(new GetExamsRegisteredForProfessor.Query
             {
-                FacultyId = facultyId, CourseId = courseId, LecturerId = lecturerId
+                FacultyId = facultyId,
+                LecturerId = lecturerId
             });
+            return HandleResult(response);
+        }
+
+        [HttpGet("currentlyOpenedExamSeason/{facultyId}")]
+        public async Task<ActionResult<ExamSeasonResponse>> GetCurrentlyOpenedOrInProcessExamSeaoson(int facultyId)
+        {
+            var response = await Mediator.Send(new GetCurrentExamSeason.Query { FacultyId = facultyId });
             return HandleResult(response);
         }
 

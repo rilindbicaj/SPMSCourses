@@ -8,6 +8,7 @@ namespace Domain
         public Guid UserId { get; set; }
         public int FileNumber { get; set; }
         public string FullName { get; set; }
+        public string Email { get; set; }
         
         public virtual ICollection<Grade> Grades { get; set; }
     }

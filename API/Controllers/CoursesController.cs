@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Commands.Grades;
@@ -38,6 +39,14 @@ namespace API.Controllers
         {
             var response = await Mediator.Send(new GetRegistrableExams.Query
                 { GetRegistrableExamsRequest = getRegisterableExamsRequest });
+            return HandleResult(response);
+        }
+
+        [HttpGet("getCoursesForLecturer/{facultyId}/{userId}")]
+        public async Task<ActionResult<List<CourseResponse>>> GetCoursesForLecturer(int facultyId, Guid userId)
+        {
+            var response = await Mediator.Send(new GetCoursesForProfessor.Query
+                { FacultyId = facultyId, UserId = userId });
             return HandleResult(response);
         }
 

@@ -1,15 +1,23 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build-env
+﻿FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
+EXPOSE 80
+EXPOSE 443
 
-COPY *.csproj ./
-RUN dotnet restore
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+WORKDIR /src
+COPY ["API/API.csproj", "API/"]
+COPY ["Application/Application.csproj", "Application/"]
+COPY ["Persistence/Persistence.csproj", "Persistence/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+RUN dotnet restore "API/API.csproj"
+COPY . .
+WORKDIR "/src/API"
+RUN dotnet build "API.csproj" -c Release -o /app/build
 
-COPY . ./
+FROM build AS publish
+RUN dotnet publish "API.csproj" -c Release -o /app/publish
 
-RUN dotnet publish -c Release -o out
-
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 
+FROM base AS final
 WORKDIR /app
-
-COPY --from=build-env /app/out .
-ENTRYPOINT [ "dotnet", "SecondService.dll" ]
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "API.dll"]

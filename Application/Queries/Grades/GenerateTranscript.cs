@@ -42,6 +42,7 @@ namespace Application.Queries.Grades
                     g.StudentId == request.GenerateTranscriptRequest.StudentId)
                     .Select(g => new Grade
                     {
+                        GradeId = g.GradeId,
                         Value = g.Value,
                         CoursesAcademicStaff = new Courses_AcademicStaff
                         {

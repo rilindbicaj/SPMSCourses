@@ -25,6 +25,8 @@ namespace Persistence
         
         public DbSet<LectureRole> LectureRoles { get; set; }
         
+        public DbSet<ExamSeasonKind> ExamSeasonKinds { get; set; }
+
         public SPMSCoursesContext(DbContextOptions options) : base(options)
         {
             
@@ -33,6 +35,11 @@ namespace Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ExamSeasonKind>(entity =>
+            {
+                entity.HasKey(e => e.ExamSeasonKindId);
+            });
 
             modelBuilder.Entity<Student>(entity =>
             {
@@ -88,6 +95,11 @@ namespace Persistence
                     .WithMany(e => e.ExamSeasons)
                     .HasForeignKey(e => e.StatusId)
                     .HasConstraintName("FK_ExamSeasons_ExamSeasonStatuses");
+                entity.HasOne(e => e.SeasonKind)
+                    .WithMany(e => e.ExamSeasons)
+                    .HasForeignKey(e => e.SeasonKindId)
+                    .IsRequired(false)
+                    .HasConstraintName("FK_ExamSeasons_ExamSeasonKinds");
             });
 
             modelBuilder.Entity<Grade>(entity =>

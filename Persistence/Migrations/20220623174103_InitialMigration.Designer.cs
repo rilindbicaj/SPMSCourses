@@ -10,8 +10,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(SPMSCoursesContext))]
-    [Migration("20220707212337_ExamSeasonKindsAdded")]
-    partial class ExamSeasonKindsAdded
+    [Migration("20220623174103_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -94,14 +94,13 @@ namespace Persistence.Migrations
                     b.Property<Guid>("AcademicStaffId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("LectureRoleId")
-                        .HasColumnType("int");
-
                     b.HasKey("CourseId", "AcademicStaffId");
 
-                    b.HasIndex("AcademicStaffId");
+                    b.HasIndex("AcademicStaffId")
+                        .IsUnique();
 
-                    b.HasIndex("LectureRoleId");
+                    b.HasIndex("CourseId")
+                        .IsUnique();
 
                     b.ToTable("CoursesAcademicStaff");
                 });
@@ -109,9 +108,7 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.ExamSeason", b =>
                 {
                     b.Property<int>("ExamSeasonId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -122,7 +119,7 @@ namespace Persistence.Migrations
                     b.Property<int>("Faculty")
                         .HasColumnType("int");
 
-                    b.Property<int>("SeasonKindId")
+                    b.Property<int>("Semester")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
@@ -133,26 +130,7 @@ namespace Persistence.Migrations
 
                     b.HasKey("ExamSeasonId");
 
-                    b.HasIndex("SeasonKindId");
-
-                    b.HasIndex("StatusId");
-
                     b.ToTable("ExamSeasons");
-                });
-
-            modelBuilder.Entity("Domain.ExamSeasonKind", b =>
-                {
-                    b.Property<int>("ExamSeasonKindId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("ExamSeasonKindName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ExamSeasonKindId");
-
-                    b.ToTable("ExamSeasonKind");
                 });
 
             modelBuilder.Entity("Domain.ExamSeasonStatus", b =>
@@ -183,7 +161,7 @@ namespace Persistence.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("DateGraded")
+                    b.Property<DateTime>("DateGraded")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ExamSeasonId")
@@ -192,7 +170,7 @@ namespace Persistence.Migrations
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("StudentId")
+                    b.Property<Guid>("Student")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Value")
@@ -203,8 +181,6 @@ namespace Persistence.Migrations
                     b.HasIndex("ExamSeasonId");
 
                     b.HasIndex("StatusId");
-
-                    b.HasIndex("StudentId");
 
                     b.HasIndex("CourseId", "AcademicStaffId");
 
@@ -224,21 +200,6 @@ namespace Persistence.Migrations
                     b.HasKey("StatusId");
 
                     b.ToTable("GradeStatuses");
-                });
-
-            modelBuilder.Entity("Domain.LectureRole", b =>
-                {
-                    b.Property<int>("LectureRoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("RoleName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("LectureRoleId");
-
-                    b.ToTable("LectureRoles");
                 });
 
             modelBuilder.Entity("Domain.Semester", b =>
@@ -263,37 +224,12 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("FacultyId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ParentSpecializationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SpecializationName")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SpecializationId");
 
-                    b.HasIndex("ParentSpecializationId");
-
                     b.ToTable("Specializations");
-                });
-
-            modelBuilder.Entity("Domain.Student", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("FileNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FullName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("Domain.Course", b =>
@@ -329,48 +265,32 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Courses_AcademicStaff", b =>
                 {
                     b.HasOne("Domain.AcademicStaff", "AcademicStaff")
-                        .WithMany("CoursesAcademicStaff")
-                        .HasForeignKey("AcademicStaffId")
+                        .WithOne("CoursesAcademicStaff")
+                        .HasForeignKey("Domain.Courses_AcademicStaff", "AcademicStaffId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Course", "Course")
-                        .WithMany("CoursesAcademicStaff")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.LectureRole", "LectureRole")
-                        .WithMany("CoursesAcademicStaves")
-                        .HasForeignKey("LectureRoleId")
-                        .HasConstraintName("FK_CoursesAcademicStaff_LectureRole")
+                        .WithOne("CoursesAcademicStaff")
+                        .HasForeignKey("Domain.Courses_AcademicStaff", "CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AcademicStaff");
 
                     b.Navigation("Course");
-
-                    b.Navigation("LectureRole");
                 });
 
             modelBuilder.Entity("Domain.ExamSeason", b =>
                 {
-                    b.HasOne("Domain.ExamSeasonKind", "SeasonKind")
-                        .WithMany("ExamSeasons")
-                        .HasForeignKey("SeasonKindId")
-                        .HasConstraintName("FK_ExamSeasons_ExamSeasonKinds");
-
                     b.HasOne("Domain.ExamSeasonStatus", "CurrentStatus")
                         .WithMany("ExamSeasons")
-                        .HasForeignKey("StatusId")
+                        .HasForeignKey("ExamSeasonId")
                         .HasConstraintName("FK_ExamSeasons_ExamSeasonStatuses")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CurrentStatus");
-
-                    b.Navigation("SeasonKind");
                 });
 
             modelBuilder.Entity("Domain.Grade", b =>
@@ -378,7 +298,6 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.ExamSeason", "ExamSeason")
                         .WithMany("Grades")
                         .HasForeignKey("ExamSeasonId")
-                        .HasConstraintName("FK_Grades_ExamSeasons")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -388,11 +307,6 @@ namespace Persistence.Migrations
                         .HasConstraintName("FK_Grades_GradeStatuses")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Domain.Student", "Student")
-                        .WithMany("Grades")
-                        .HasForeignKey("StudentId")
-                        .HasConstraintName("FK_Grades_Students");
 
                     b.HasOne("Domain.Courses_AcademicStaff", "CoursesAcademicStaff")
                         .WithMany("Grades")
@@ -406,18 +320,6 @@ namespace Persistence.Migrations
                     b.Navigation("ExamSeason");
 
                     b.Navigation("Status");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("Domain.Specialization", b =>
-                {
-                    b.HasOne("Domain.Specialization", "ParentSpecialization")
-                        .WithMany("ChildSpecializations")
-                        .HasForeignKey("ParentSpecializationId")
-                        .HasConstraintName("FK_Specializations_SpecializaitionsChild");
-
-                    b.Navigation("ParentSpecialization");
                 });
 
             modelBuilder.Entity("Domain.AcademicStaff", b =>
@@ -445,11 +347,6 @@ namespace Persistence.Migrations
                     b.Navigation("Grades");
                 });
 
-            modelBuilder.Entity("Domain.ExamSeasonKind", b =>
-                {
-                    b.Navigation("ExamSeasons");
-                });
-
             modelBuilder.Entity("Domain.ExamSeasonStatus", b =>
                 {
                     b.Navigation("ExamSeasons");
@@ -460,11 +357,6 @@ namespace Persistence.Migrations
                     b.Navigation("Grades");
                 });
 
-            modelBuilder.Entity("Domain.LectureRole", b =>
-                {
-                    b.Navigation("CoursesAcademicStaves");
-                });
-
             modelBuilder.Entity("Domain.Semester", b =>
                 {
                     b.Navigation("Courses");
@@ -472,14 +364,7 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Specialization", b =>
                 {
-                    b.Navigation("ChildSpecializations");
-
                     b.Navigation("Courses");
-                });
-
-            modelBuilder.Entity("Domain.Student", b =>
-                {
-                    b.Navigation("Grades");
                 });
 #pragma warning restore 612, 618
         }

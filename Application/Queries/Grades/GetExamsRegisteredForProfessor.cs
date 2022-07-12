@@ -20,7 +20,6 @@ namespace Application.Queries.Grades
         public class Query : IRequest<Result<List<GradeResponse>>>
         {
             public int FacultyId { get; set; }
-            public int CourseId { get; set; }
             public Guid LecturerId { get; set; }
         }
 
@@ -43,8 +42,9 @@ namespace Application.Queries.Grades
                 
                 var grades = await _context.Grades
                     .Where(g => g.ExamSeasonId == currentlyOpenedExam.ExamSeasonId
-                    //&& g.CourseId == request.CourseId
-                    && g.AcademicStaffId == request.LecturerId)
+                                && g.AcademicStaffId == request.LecturerId)
+                    .Include(g => g.Student)
+                    .Include(g => g.CoursesAcademicStaff.Course)
                     .ToListAsync();
 
                 var res = _mapper.Map<List<GradeResponse>>(grades);

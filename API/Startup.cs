@@ -1,5 +1,7 @@
 using System;
+using Application.MessageBusClient;
 using Application.Core;
+using Application.EventPublisher;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +38,15 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
+			 services.AddCors(opt =>
+           {
+               opt.AddPolicy("CorsPolicy", policy =>
+               {
+                   policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin().AllowCredentials().WithOrigins("http://localhost:3000");
+               });
+           });
+             services.AddScoped<IMessageBusClient, MessageBusClient>();
+             services.AddScoped<IEventPublisher, EventPublisher>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,6 +60,8 @@ namespace API
             }
 
             app.UseHttpsRedirection();
+
+			app.UseCors("CorsPolicy");
 
             app.UseRouting();
 

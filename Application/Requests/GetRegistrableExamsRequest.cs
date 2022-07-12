@@ -7,6 +7,5 @@ namespace Application.Requests
         public Guid StudentId { get; set; }
         public int SpecializationId { get; set; }
         public int CurrentSemesterId { get; set; }
-        public bool SemesterInProgress { get; set; }
     }
 }

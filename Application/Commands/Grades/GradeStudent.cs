@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Application.Core;
 using Application.Core.Factories;
 using Application.Enums;
+using Application.EventPublisher;
+using Application.Events;
 using Application.Requests;
 using AutoMapper;
 using Domain;
@@ -25,11 +27,13 @@ namespace Application.Commands.Grades
         {
             private readonly SPMSCoursesContext _context;
             private readonly IMapper _mapper;
+            private readonly IEventPublisher _publisher;
 
-            public Handler(SPMSCoursesContext context, IMapper mapper)
+            public Handler(SPMSCoursesContext context, IMapper mapper, IEventPublisher publisher)
             {
                 _context = context;
                 _mapper = mapper;
+                _publisher = publisher;
             }
 
             public async Task<Result<Unit>> Handle(Command request, CancellationToken token)
@@ -53,10 +57,28 @@ namespace Application.Commands.Grades
                 if (grade.Value == 0) grade.StatusId = (int) GradeStatusTypes.Abstained;
 
                 _context.Entry(grade).State = EntityState.Modified;
+
+                var eventData = _mapper.Map<StudentGradedEvent>(await GetEventForGrade(grade.GradeId));
+                
+                _publisher.PublishStudentGradedEvent(eventData);
+                
+                Console.WriteLine(eventData);
                 
                 return await _context.SaveChangesAsync() > 0 ? 
                     ResultFactory.CreateSuccessfulResult(Unit.Value) : 
                     ResultFactory.CreateFailedResult<Unit>("There was a problem saving changes to the database.");
+            }
+
+            private async Task<Grade> GetEventForGrade(int gradeId)
+            {
+                return await _context.Grades
+                    .Where(g => g.GradeId == gradeId)
+                    .Include(g => g.Student)
+                    .Include(g => g.CoursesAcademicStaff)
+                    .ThenInclude(g => g.AcademicStaff)
+                    .Include(g => g.CoursesAcademicStaff)
+                    .ThenInclude(g => g.Course)
+                    .FirstOrDefaultAsync();
             }
 
         }

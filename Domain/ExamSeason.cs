@@ -11,9 +11,10 @@ namespace Domain
         public DateTime EndDate { get; set; }
         public int Faculty { get; set; }
         public int StatusId { get; set; }
+        public int? SeasonKindId { get; set; }
         public virtual ExamSeasonStatus CurrentStatus { get; set; }
         
         public virtual ICollection<Grade> Grades { get; set; }
-
+        public virtual ExamSeasonKind SeasonKind { get; set; }
     }
 }

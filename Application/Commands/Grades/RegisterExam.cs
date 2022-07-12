@@ -32,16 +32,16 @@ namespace Application.Commands.Grades
             public async Task<Result<Unit>> Handle(Command request, CancellationToken token)
             {
                 var currentlyOpenedSeason = await GetCurrenlyOpenedExamSeason(request.RegisterExamRequest.FacultyId);
-                
-                if(currentlyOpenedSeason == null)
+
+                if (currentlyOpenedSeason == null)
                     return ResultFactory.CreateFailedResult<Unit>("There is no exam season currently opened for the specified faculty.");
 
-                if(await ExamAlreadyRegistered(
+                if (await ExamAlreadyRegistered(
                        request.RegisterExamRequest.CourseId,
                        request.RegisterExamRequest.LecturerId,
                        request.RegisterExamRequest.StudentId))
                     return ResultFactory.CreateFailedResult<Unit>("Student has already registered this exam before.");
-                
+
                 var grade = new Grade
                 {
                     CourseId = request.RegisterExamRequest.CourseId,
@@ -51,27 +51,27 @@ namespace Application.Commands.Grades
                     StudentId = request.RegisterExamRequest.StudentId,
                     ExamSeasonId = currentlyOpenedSeason.ExamSeasonId
                 };
-                
+
                 await _context.AddAsync(grade);
 
                 return await _context.SaveChangesAsync() > 0
                     ? ResultFactory.CreateSuccessfulResult(Unit.Value)
                     : ResultFactory.CreateFailedResult<Unit>("Problem saving changes to database");
-                
+
             }
-            
+
             private async Task<ExamSeason> GetCurrenlyOpenedExamSeason(int facultyId)
             {
                 return await _context.ExamSeasons.Where(e =>
                         e.Faculty == facultyId
-                        && e.StatusId == (int) ExamSeasonStatusTypes.InProcess)
+                        && e.StatusId == (int)ExamSeasonStatusTypes.Open)
                     .FirstOrDefaultAsync();
             }
 
             private async Task<bool> ExamAlreadyRegistered(int courseId, Guid academicStaffId, Guid studentId)
             {
                 return await _context.Grades.Where(g =>
-                        g.StudentId == studentId 
+                        g.StudentId == studentId
                         && g.CourseId == courseId
                         && g.AcademicStaffId == academicStaffId
                         && g.StatusId < 3)

@@ -36,15 +36,7 @@ namespace Application.Queries.Grades
 
             public async Task<Result<List<CourseResponse>>> Handle(Query request, CancellationToken token)
             {
-
-                // Decrement the semesterId if the semester is currently in progress
-                // This way the query won't show exams for the current semester if it's still being held (in November, April seasons)
-                // Use case 1 - November season, student X is still in the first semester. SemesterId will be 0, hence nothing will show up.
-                // Use case 2 - February season, student X has finished his first semester. SemesterId will be 1, therefore allowing him to register 1st semester exams.
-
-                if (request.GetRegistrableExamsRequest.SemesterInProgress)
-                    request.GetRegistrableExamsRequest.CurrentSemesterId--;
-
+                
                 var specialization = await _context.Specializations.Where(e =>
                     e.SpecializationId == request.GetRegistrableExamsRequest.SpecializationId).FirstOrDefaultAsync();
                 
@@ -56,6 +48,9 @@ namespace Application.Queries.Grades
                 if(currentlyOpenedSeason == null)
                     return ResultFactory.CreateFailedResult<List<CourseResponse>>("There currently isn't an open exam season for the specified faculty.");
 
+                if (!CurrentSeasonIsRegular(currentlyOpenedSeason.SeasonKind.ExamSeasonKindId))
+                    request.GetRegistrableExamsRequest.CurrentSemesterId--;
+                
                 var registrableExams = await GetExamsStudentCanRegister(
                     specialization, request.GetRegistrableExamsRequest.CurrentSemesterId, request.GetRegistrableExamsRequest.StudentId);
                 
@@ -107,10 +102,25 @@ namespace Application.Queries.Grades
             {
                 return await _context.ExamSeasons.Where(e =>
                         e.Faculty == facultyId
-                        && (e.StatusId == (int) ExamSeasonStatusTypes.InProcess
-                            || e.StatusId == (int) ExamSeasonStatusTypes.Open))
+                        && 
+                        // (e.StatusId == (int) ExamSeasonStatusTypes.InProcess ||
+                             e.StatusId == (int) ExamSeasonStatusTypes.Open)
+                    .Include(e => e.SeasonKind)
                     .FirstOrDefaultAsync();
             }
+
+            /// <summary>
+            /// Checks whether the provided ExamSeasonKind is a regular registering season or an irregular one.
+            /// </summary>
+            /// <param name="examSeasonKindId">The ID of the ExamSeasonKind object</param>
+            /// <returns>True if the season kind is regular, false otherwise.</returns>
+            private bool CurrentSeasonIsRegular(int examSeasonKindId)
+            {
+                return examSeasonKindId is (int) ExamSeasonKindsEnum.FEBRUARY
+                    or (int) ExamSeasonKindsEnum.JUNE
+                    or (int) ExamSeasonKindsEnum.SEPTEMBER;
+            }
+            
         }
     }
 }

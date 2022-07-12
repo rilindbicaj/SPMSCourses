@@ -3,17 +3,15 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
 namespace Persistence.Migrations
 {
     [DbContext(typeof(SPMSCoursesContext))]
-    [Migration("20220707212604_ExamSeasonKindsAdded")]
-    partial class ExamSeasonKindsAdded
+    partial class SPMSCoursesContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,7 +120,7 @@ namespace Persistence.Migrations
                     b.Property<int>("Faculty")
                         .HasColumnType("int");
 
-                    b.Property<int>("SeasonKindId")
+                    b.Property<int?>("SeasonKindId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
@@ -284,6 +282,9 @@ namespace Persistence.Migrations
                     b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("FileNumber")
                         .HasColumnType("int");
